@@ -307,7 +307,11 @@ class FrameStack(gym.Wrapper):
 
     def reset(self):
         obs = self.env.reset()
-        qpos = self.env.get_qpos()
+
+        # This is more than just qpos
+        # physics.get_state gets qpos, qvel, act
+        qpos = self.env.physics.get_state()
+
         for _ in range(self._k):
             self._frames.append(obs)
             self._qpos.append(qpos)
@@ -317,7 +321,7 @@ class FrameStack(gym.Wrapper):
         obs, reward, done, info = self.env.step(action)
 
         self._frames.append(obs)
-        self._qpos.append(info["qpos"])
+        self._qpos.append(info["internal_state"])
         return self._get_obs(), reward, done, self._get_qpos()
 
     def _get_obs(self):
